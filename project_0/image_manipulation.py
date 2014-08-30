@@ -27,11 +27,9 @@ def negate_image(nyc):
     return ~nyc
 
 
-def swap_red_and_green(nyc):
+def swap_blue_and_green(nyc):
     image = nyc
     for i in range(len(nyc)):
         for j in range(len(nyc[i])):
-            image[i][j][0] = nyc[i][j][1]
-            image[i][j][1] = nyc[i][j][0]
-            image[i][j][2] = nyc[i][j][2]
+            image[i][j][0], image[i][j][1] = image[i][j][1], image[i][j][0]
     return image
