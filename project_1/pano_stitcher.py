@@ -7,8 +7,9 @@ A shell of starter functions that already have tests is listed below.
 TODO: Implement!
 """
 
-import cv2
-import numpy
+import cv2 
+from find_obj import filter_matches,explore_match
+import numpy as np
 
 
 def homography(image_a, image_b):
@@ -21,6 +22,25 @@ def homography(image_a, image_b):
     Returns: the 3x3 perspective transformation matrix (aka homography)
              mapping points in image_b to corresponding points in image_a.
     """
+    sift = cv2.SIFT()
+    #find features and descriptors 
+    kp1, des1 = sift.detectAndCompute(image_a, None)
+    kp2, des2 = sift.detectAndCompute(image_b, None)
+    
+    #brute force matcher
+    bf = cv2.BFMatcher(cv2.NORM_L2)
+
+    # Draw first 10 matches.
+    matches = bf.knnMatch(des1, trainDescriptors = des2, k = 2)
+    p1, p2, kp_pairs = filter_matches(kp1, kp2, matches)
+    explore_match('find_obj', image_a, imgage_b, kp_pairs)#cv2 shows image
+
+    cv2.waitKey()
+    cv2.destroyAllWindows()
+    #img1 = cv2.drawKeypoints(image_a, kp1)
+    #img2 = cv2.drawKeypoints(image_b, kp2)
+    #cv2.imwrite('image_a.jpg',img1)
+    #cv2.imwrite('image_b.jpg',img2)
     pass
 
 
