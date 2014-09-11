@@ -8,7 +8,6 @@ TODO: Implement!
 """
 
 import cv2 
-from find_obj import filter_matches,explore_match
 import numpy as np
 
 
@@ -31,16 +30,29 @@ def homography(image_a, image_b):
     bf = cv2.BFMatcher(cv2.NORM_L2)
 
     # Draw first 10 matches.
-    matches = bf.knnMatch(des1, trainDescriptors = des2, k = 2)
-    p1, p2, kp_pairs = filter_matches(kp1, kp2, matches)
-    explore_match('find_obj', image_a, imgage_b, kp_pairs)#cv2 shows image
+    matches = bf.knnMatch(des1, des2, k = 10)
+    best_matches = []
+    for x in matches:
+      #print x.distance, y.distance
+      #if x.distance <0.7*y.distance:
+      print x
+      best_matches.append(x)
 
-    cv2.waitKey()
-    cv2.destroyAllWindows()
+    src_pts = np.float32([ kp1[x.queryIdx].pt for x in best_matches ])
+    dst_pts = np.float32([ kp2[y.trainIdx].pt for y in best_matches ])
+
+    #for x in best_matches:
+    #    print kp1[x.queryIdx].pt, kp2[x.trainIdx].pt
+    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+    return M
+    #matches = sorted(matches, key = lambda x:x.distance)
+
+    #img = cv2.drawMatches(image_a, kp1, image_b, kp2, matches[:10], flags=2)
+    #retval, mask = cv2.findHomography()
     #img1 = cv2.drawKeypoints(image_a, kp1)
     #img2 = cv2.drawKeypoints(image_b, kp2)
     #cv2.imwrite('image_a.jpg',img1)
-    #cv2.imwrite('image_b.jpg',img2)
+    #cv2.imwrite('matches.jpg',img)
     pass
 
 
