@@ -22,37 +22,27 @@ def homography(image_a, image_b):
              mapping points in image_b to corresponding points in image_a.
     """
     sift = cv2.SIFT()
-    #find features and descriptors 
+
+    #find features and descriptors
     kp1, des1 = sift.detectAndCompute(image_a, None)
     kp2, des2 = sift.detectAndCompute(image_b, None)
-    
-    #brute force matcher
-    bf = cv2.BFMatcher(cv2.NORM_L2)
 
-    # Draw first 10 matches.
-    matches = bf.knnMatch(des1, des2, k = 10)
+    bf = cv2.BFMatcher()
+    matches = bf.knnMatch(des1, des2, k=2)
+
+    #store good matches
     best_matches = []
-    for x in matches:
-      #print x.distance, y.distance
-      #if x.distance <0.7*y.distance:
-      print x
-      best_matches.append(x)
+    for x, y in matches:
+        if x.distance < 0.75 * y.distance:
+            best_matches.append(x)
 
-    src_pts = np.float32([ kp1[x.queryIdx].pt for x in best_matches ])
-    dst_pts = np.float32([ kp2[y.trainIdx].pt for y in best_matches ])
+    src_pts = np.float32([kp1[m.queryIdx].pt for m in best_matches])
+    dst_pts = np.float32([kp2[m.trainIdx].pt for m in best_matches])
 
-    #for x in best_matches:
-    #    print kp1[x.queryIdx].pt, kp2[x.trainIdx].pt
-    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+    M, mask = cv2.findHomography(dst_pts, src_pts, cv2.RANSAC, 5.0)
+
     return M
-    #matches = sorted(matches, key = lambda x:x.distance)
 
-    #img = cv2.drawMatches(image_a, kp1, image_b, kp2, matches[:10], flags=2)
-    #retval, mask = cv2.findHomography()
-    #img1 = cv2.drawKeypoints(image_a, kp1)
-    #img2 = cv2.drawKeypoints(image_b, kp2)
-    #cv2.imwrite('image_a.jpg',img1)
-    #cv2.imwrite('matches.jpg',img)
     pass
 
 
