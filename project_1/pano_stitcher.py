@@ -7,7 +7,7 @@ A shell of starter functions that already have tests is listed below.
 TODO: Implement!
 """
 
-import cv2 
+import cv2
 import numpy as np
 
 
@@ -23,14 +23,14 @@ def homography(image_a, image_b):
     """
     sift = cv2.SIFT()
 
-    #find features and descriptors
+    # find features and descriptors
     kp1, des1 = sift.detectAndCompute(image_a, None)
     kp2, des2 = sift.detectAndCompute(image_b, None)
 
     bf = cv2.BFMatcher()
     matches = bf.knnMatch(des1, des2, k=2)
 
-    #store good matches
+    # store good matches
     best_matches = []
     for x, y in matches:
         if x.distance < 0.75 * y.distance:
