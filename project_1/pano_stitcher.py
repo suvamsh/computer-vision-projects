@@ -64,6 +64,13 @@ def warp_image(image, homography):
         corner in the target space of 'homography', which accounts for any
         offset translation component of the homography.
     """
+    rows, cols, _ = image.shape
+    rows *= int(homography[0][0])
+    cols *= int(homography[1][1])
+    img = cv2.warpPerspective(image, homography, (cols, rows))
+
+    return img, (homography[0][2], homography[1][2])
+
     pass
 
 
