@@ -69,7 +69,7 @@ def warp_image(image, homography):
     cols *= int(homography[1][1])
     img = cv2.warpPerspective(image, homography, (cols, rows))
 
-    return img, (homography[0][2], homography[1][2])
+    return img, (homography[0][0], homography[0][1])
 
     pass
 
@@ -86,4 +86,12 @@ def create_mosaic(images, origins):
              in the mosaic not covered by any input image should have their
              alpha channel set to zero.
     """
+    sift = cv2.SIFT()
+    for i in range(len(images)):
+      for j in range(len(images)):
+        if(i != j):
+          m = homography(images[i],images[j])
+          print m,"\n***\n"
+
+    return images[1]
     pass
