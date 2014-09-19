@@ -40,7 +40,7 @@ def homography(image_a, image_b):
 
     M, mask = cv2.findHomography(dst_pts, src_pts, cv2.RANSAC, 5.0)
     if(len(best_matches) <= 100):
-        return np.eye(3,3)
+        return np.eye(3, 3)
     else:
         return M
 
@@ -66,27 +66,19 @@ def warp_image(image, homography):
         offset translation component of the homography.
     """
     rows, cols, _ = image.shape
-    rows *= int(homography[0][0])
-    cols *= int(homography[1][1])
+    # rows *= int(homography[0][0])
+    # cols *= int(homography[1][1])
+    arr = np.matrix(
+        [[1.0, 0.0, float(cols)], [0.0, 1.0, float(rows)], [0.0, 0.0, 1.0]])
+    print arr, "\n"
+    print homography
+    homography2 = arr * homography
+    print homography2
     img = cv2.warpPerspective(image, homography, (cols, rows))
-    return img, (homography[0][2], homography[1][2])
+    return img, (100, 100)
 
     pass
 
-def stitch(img1, img2, homo):
-  rows1, cols1, _ = img1.shape
-  rows2, cols2, _ = img2.shape
-  ret_image = np.zeros((rows1+rows2, cols1+cols2, 4), np.uint8)
-
-  for i in range(rows1):
-      for j in range(cols1):
-          ret_image[i][j] = img1[i][j]
-  
-  for i in range(rows2):
-      for j in range(cols2):
-          ret_image[i+homo[1][2]][j+homo[0][2]] = img2[i][j]
-
-  return ret_image
 
 def create_mosaic(images, origins):
     """Combine multiple images into a mosaic.
@@ -100,47 +92,52 @@ def create_mosaic(images, origins):
              in the mosaic not covered by any input image should have their
              alpha channel set to zero.
     """
-    images = list(images)
-    sift = cv2.SIFT()
-    st_img = images[0]
-    print images[0]
-    del images[0]
-    
-    s = len(images)
-    i = 0
+    minx = 0
+    maxx = 0
+    miny = 0
+    maxy = 0
+    whichimagex = 0
+    whichimagey = 0
+    for i in origins:
+        if i[0] < minx:
+            minx = i[0]
+            whichimage = origins.index(i)
+        elif i[0] > maxx:
+            maxx = i[0]
+            whichimage = origins.index(i)
 
-    while(i < s):
-      print i
-      img = images[0]
-      del images[0]
-      m = homography(st_img, img)
-      if(not np.array_equal(m, np.eye(3,3))):
-        st_img = stitch(st_img, img, m)
-        i += 1
-      else:
-        images.append(img)        
+        if i[1] < miny:
+            miny = i[1]
+            whichimagey = origins.index(i)
+        elif i[1] > maxy:
+            maxy = i[1]
+            whichimagey = origins.index(i)
+    h, w, _ = images[whichimagex].shape
+    width = abs(minx) + maxx + w
+    h, w, _ = images[whichimagey].shape
+    height = abs(miny) + maxy + h
+    toskip = 0
+    ret_image = np.zeros((height, width, 4), np.uint8)
+    for k in range(len(images)):
+        if origins[k] == (0, 0):
+            toskip = k
+            continue
+        h, w, _ = images[k].shape
+        for y in range(h):
+            for x in range(w):
+                tmp = images[k][y][x]
+                if images[k][y][x][3] == 255:
+                    dy = origins[k][1] + abs(miny) + y
+                    dx = origins[k][0] + abs(minx) + x
+                    ret_image[dy][dx] = tmp
 
-    '''
-    for i in range(len(images[1:])):
-      print i
-      m = homography(st_img, images[i])
-      if(not np.array_equal(m,np.eye(3,3))):
-          st_img = stitch(st_img, images[i], m)
-      else:
-        images.append(images[i])
-    '''
-    '''
-    for i in range(len(images)):
-      for j in range(len(images)):
-        if(i != j):
-          m = homography(images[i],images[j])
-          if(not np.array_equal(m,np.eye(3,3))):
-              st_img = stitch(images[i], images[j], m)
-              cv2.imwrite("test.png", st_img)
-              exit()
-          else:
-            print "FOUND EYE!!"
-    '''
-    cv2.imwrite("test.jpg", st_img)
-    return st_img
+    h, w, _ = images[toskip].shape
+    for y in range(h):
+        for x in range(w):
+            tmp = images[toskip][y][x]
+            if images[toskip][y][x][3] == 255:
+                    dy = origins[toskip][1] + abs(miny) + y
+                    dx = origins[toskip][0] + abs(minx) + x
+                    ret_image[dy][dx] = tmp
+    return ret_image
     pass
