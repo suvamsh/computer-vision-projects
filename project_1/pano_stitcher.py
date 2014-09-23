@@ -14,8 +14,9 @@ import numpy as np
 def translate_homography(x, y):
     """Return a homography that translates by (x, y)"""
     return np.array([[1.0, 0.0, x],
-                        [0.0, 1.0, y],
-                        [0.0, 0.0, 1.0]])
+                     [0.0, 1.0, y],
+                     [0.0, 0.0, 1.0]])
+
 
 def homography(image_a, image_b):
     """Returns the homography mapping image_b into alignment with image_a.
@@ -40,9 +41,10 @@ def homography(image_a, image_b):
     for x, y in matches:
         if x.distance < 0.75 * y.distance:
             best_matches.append(x)
-    src_pts = np.float32([kp1[x.queryIdx].pt for x in best_matches]).reshape(-1,1,2)
-    dst_pts = np.float32([kp2[y.trainIdx].pt for y in best_matches]).reshape(-1,1,2)
-    # print cv2.perspectiveTransform(dst_pts, src_pts)
+    src_pts = np.float32(
+        [kp1[x.queryIdx].pt for x in best_matches]).reshape(-1, 1, 2)
+    dst_pts = np.float32(
+        [kp2[y.trainIdx].pt for y in best_matches]).reshape(-1, 1, 2)
     M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
     return M
 
@@ -69,22 +71,13 @@ def warp_image(image, homography):
     """
     image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     rows, cols, _ = image.shape
-    # rows *= int(homography[0][0])
-    # cols *= int(homography[1][1])
-    #print homography
     arr = translate_homography(-homography[0][2], -homography[1][2])
-    #print arr, "\n"
-    #print homography
-    t1, t2 = homography[0,2], homography[1,2]
-    #homography2 = arr * homography
-    #homography[0][2] = 0
-    #homography[1][2] = 0
-    #print homography
+    t1, t2 = homography[0, 2], homography[1, 2]
     translated_homography = np.dot(arr, homography)
-    homography[0,2] = t1
-    homography[1,2] = t2
-    #print homography
-    img = cv2.warpPerspective(image, translated_homography, (int(cols*homography[0,0]), int(rows*homography[1,1])))
+    homography[0, 2] = t1
+    homography[1, 2] = t2
+    img = cv2.warpPerspective(image, translated_homography, (int(
+        cols * homography[0, 0]), int(rows * homography[1, 1])))
     img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
     return img, (t1, t2)
 
@@ -115,14 +108,12 @@ def create_mosaic(images, origins):
             whichimagex = origins.index(i)
         elif i[0] > maxx:
             maxx = i[0]
-            #whichimagex = origins.index(i)
 
         if i[1] < miny:
             miny = i[1]
             whichimagey = origins.index(i)
         elif i[1] > maxy:
             maxy = i[1]
-            #whichimagey = origins.index(i)
 
     h, w, _ = images[whichimagex].shape
     width = abs(minx) + maxx + w
@@ -145,10 +136,6 @@ def create_mosaic(images, origins):
                         dx = origins[k][0] + abs(minx) + x
                         ret_image[dy][dx] = tmp
                     except IndexError:
-                        print ret_image.shape
-                        print origins[k]
-                        print 'mins: ', minx, miny
-                        print dy, dx
                         ret_image[dy][dx] = tmp
 
     h, w, _ = images[toskip].shape
@@ -156,8 +143,8 @@ def create_mosaic(images, origins):
         for x in range(w):
             tmp = images[toskip][y][x]
             if images[toskip][y][x][3] == 255:
-                    dy = origins[toskip][1] + abs(miny) + y
-                    dx = origins[toskip][0] + abs(minx) + x
-                    ret_image[dy][dx] = tmp
+                dy = origins[toskip][1] + abs(miny) + y
+                dx = origins[toskip][0] + abs(minx) + x
+                ret_image[dy][dx] = tmp
     return ret_image
     pass
