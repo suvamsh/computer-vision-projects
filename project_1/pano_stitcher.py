@@ -111,17 +111,18 @@ def create_mosaic(images, origins):
     for i in origins:
         if i[0] < minx:
             minx = i[0]
-            whichimage = origins.index(i)
+            whichimagex = origins.index(i)
         elif i[0] > maxx:
             maxx = i[0]
-            whichimage = origins.index(i)
+            #whichimagex = origins.index(i)
 
         if i[1] < miny:
             miny = i[1]
             whichimagey = origins.index(i)
         elif i[1] > maxy:
             maxy = i[1]
-            whichimagey = origins.index(i)
+            #whichimagey = origins.index(i)
+
     h, w, _ = images[whichimagex].shape
     width = abs(minx) + maxx + w
     h, w, _ = images[whichimagey].shape
@@ -133,13 +134,22 @@ def create_mosaic(images, origins):
             toskip = k
             continue
         h, w, _ = images[k].shape
+        print origins[k]
+        print 'h&w ', h, w
         for y in range(h):
             for x in range(w):
                 tmp = images[k][y][x]
                 if images[k][y][x][3] == 255:
-                    dy = origins[k][1] + abs(miny) + y
-                    dx = origins[k][0] + abs(minx) + x
-                    ret_image[dy][dx] = tmp
+                    try:
+                        dy = origins[k][1] + abs(miny) + y
+                        dx = origins[k][0] + abs(minx) + x
+                        ret_image[dy][dx] = tmp
+                    except IndexError:
+                        print ret_image.shape
+                        print origins[k]
+                        print 'mins: ', minx, miny
+                        print dy, dx
+                        ret_image[dy][dx] = tmp
 
     h, w, _ = images[toskip].shape
     for y in range(h):
