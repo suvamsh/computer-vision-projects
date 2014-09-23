@@ -133,9 +133,8 @@ def create_mosaic(images, origins):
         if origins[k] == (0, 0):
             toskip = k
             continue
+
         h, w, _ = images[k].shape
-        print origins[k]
-        print 'h&w ', h, w
         for y in range(h):
             for x in range(w):
                 tmp = images[k][y][x]
