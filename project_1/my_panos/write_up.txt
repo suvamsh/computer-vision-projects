@@ -1,0 +1,8 @@
+Our testing script is test.py located in the project_1 folder.
+It currently runs the panoramic stitching on pre-warped images.
+This is due to the images being captured on a phone and 
+needing to be manually rotated after going through warp_image.
+Because of this we have also hard coded the origin values in
+instead of getting them from our warp_image.
+
+Heads up, our panorama stitching runs slow.
