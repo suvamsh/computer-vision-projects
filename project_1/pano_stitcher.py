@@ -64,17 +64,21 @@ def warp_image(image, homography):
     rows, cols, _ = image.shape
     # rows *= int(homography[0][0])
     # cols *= int(homography[1][1])
+    print homography
     arr = np.matrix(
-        [[1.0, 0.0, homography[0][2]], [0.0, 1.0, homography[1][2]], [0.0, 0.0, 1.0]])
+        [[1.0, 0.0, -homography[0][2]], [0.0, 1.0, -homography[1][2]], [0.0, 0.0, 1.0]])
     #print arr, "\n"
     #print homography
-    t1, t2 = homography[0][2], homography[1][2]
+    t1, t2 = homography[0,2], homography[1,2]
     # homography2 = arr * homography
     #homography[0][2] = 0
     #homography[1][2] = 0
     #print homography
-    homography = arr * homography
-    img = cv2.warpPerspective(image, homography, (int(cols*homography[0][0]), int(rows*homography[1][1])))
+    homography = np.dot(arr, homography)
+    homography[0,2] = t1
+    homography[1,2] = t2
+    print homography
+    img = cv2.warpPerspective(image, homography, (3000,3000))#(int(cols*homography[0,0]), int(rows*homography[1,1])))
     img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
     return img, (t1, t2)
 
