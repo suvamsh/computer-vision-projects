@@ -24,9 +24,8 @@ def homography(image_a, image_b):
     sift = cv2.SIFT()
 
     # find features and descriptors
-    kp1, des1 = sift.detectAndCompute(image_a, None)
-    kp2, des2 = sift.detectAndCompute(image_b, None)
-
+    kp1, des1 = sift.detectAndCompute(image_b, None)
+    kp2, des2 = sift.detectAndCompute(image_a, None)
     bf = cv2.BFMatcher()
     matches = bf.knnMatch(des1, des2, k=2)
 
@@ -35,14 +34,11 @@ def homography(image_a, image_b):
     for x, y in matches:
         if x.distance < 0.75 * y.distance:
             best_matches.append(x)
-    src_pts = np.float32([kp1[m.queryIdx].pt for m in best_matches])
-    dst_pts = np.float32([kp2[m.trainIdx].pt for m in best_matches])
-
-    M, mask = cv2.findHomography(dst_pts, src_pts, cv2.RANSAC, 5.0)
-    if(len(best_matches) <= 100):
-        return np.eye(3, 3)
-    else:
-        return M
+    src_pts = np.float32([kp1[x.queryIdx].pt for x in best_matches]).reshape(-1,1,2)
+    dst_pts = np.float32([kp2[y.trainIdx].pt for y in best_matches]).reshape(-1,1,2)
+    # print cv2.perspectiveTransform(dst_pts, src_pts)
+    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+    return M
 
     pass
 
@@ -69,13 +65,18 @@ def warp_image(image, homography):
     # rows *= int(homography[0][0])
     # cols *= int(homography[1][1])
     arr = np.matrix(
-        [[1.0, 0.0, float(cols)], [0.0, 1.0, float(rows)], [0.0, 0.0, 1.0]])
-    print arr, "\n"
-    print homography
-    homography2 = arr * homography
-    print homography2
-    img = cv2.warpPerspective(image, homography, (cols, rows))
-    return img, (100, 100)
+        [[1.0, 0.0, homography[0][2]], [0.0, 1.0, homography[1][2]], [0.0, 0.0, 1.0]])
+    #print arr, "\n"
+    #print homography
+    t1, t2 = homography[0][2], homography[1][2]
+    # homography2 = arr * homography
+    #homography[0][2] = 0
+    #homography[1][2] = 0
+    #print homography
+    homography = arr * homography
+    img = cv2.warpPerspective(image, homography, (int(cols*homography[0][0]), int(rows*homography[1][1])))
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+    return img, (t1, t2)
 
     pass
 
