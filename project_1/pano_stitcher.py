@@ -11,6 +11,12 @@ import cv2
 import numpy as np
 
 
+def translate_homography(x, y):
+    """Return a homography that translates by (x, y)"""
+    return np.array([[1.0, 0.0, x],
+                        [0.0, 1.0, y],
+                        [0.0, 0.0, 1.0]])
+
 def homography(image_a, image_b):
     """Returns the homography mapping image_b into alignment with image_a.
 
@@ -64,21 +70,20 @@ def warp_image(image, homography):
     rows, cols, _ = image.shape
     # rows *= int(homography[0][0])
     # cols *= int(homography[1][1])
-    print homography
-    arr = np.matrix(
-        [[1.0, 0.0, -homography[0][2]], [0.0, 1.0, -homography[1][2]], [0.0, 0.0, 1.0]])
+    #print homography
+    arr = translate_homography(-homography[0][2], -homography[1][2])
     #print arr, "\n"
     #print homography
     t1, t2 = homography[0,2], homography[1,2]
-    # homography2 = arr * homography
+    #homography2 = arr * homography
     #homography[0][2] = 0
     #homography[1][2] = 0
     #print homography
-    homography = np.dot(arr, homography)
+    translated_homography = np.dot(arr, homography)
     homography[0,2] = t1
     homography[1,2] = t2
-    print homography
-    img = cv2.warpPerspective(image, homography, (3000,3000))#(int(cols*homography[0,0]), int(rows*homography[1,1])))
+    #print homography
+    img = cv2.warpPerspective(image, translated_homography, (int(cols*homography[0,0]), int(rows*homography[1,1])))
     img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
     return img, (t1, t2)
 
