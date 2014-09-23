@@ -67,6 +67,7 @@ def warp_image(image, homography):
         corner in the target space of 'homography', which accounts for any
         offset translation component of the homography.
     """
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
     rows, cols, _ = image.shape
     # rows *= int(homography[0][0])
     # cols *= int(homography[1][1])
