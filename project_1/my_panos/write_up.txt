@@ -6,3 +6,9 @@ Because of this we have also hard coded the origin values in
 instead of getting them from our warp_image.
 
 Heads up, our panorama stitching runs slow.
+
+Usage:
+
+python test.py
+
+This will result in an image called "our_stitched_image.png" to be created in my_panos. This is a stitch of our own 3 images taken from our cell phone. The pre-warped images are provided in my_panos.
