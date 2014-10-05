@@ -1,4 +1,2 @@
-projects-ss56236
-================
-
-ss56236's private project repo
+This repository contains code for Computer Vision: 3D Reconstruction
+By Suvamsh and partners
