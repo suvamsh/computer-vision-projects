@@ -27,29 +27,30 @@ def rectify_pair(image_left, image_right, viz=False):
 
     # FLANN parameters
     FLANN_INDEX_KDTREE = 0
-    index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
+    index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
     search_params = dict(checks=50)
 
-    flann = cv2.FlannBasedMatcher(index_params,search_params)
-    matches = flann.knnMatch(des1,des2,k=2)
+    flann = cv2.FlannBasedMatcher(index_params, search_params)
+    matches = flann.knnMatch(des1, des2, k=2)
     # store good matches
     good = []
     pts1 = []
     pts2 = []
-    for i,(m,n) in enumerate(matches):
-      if m.distance < 0.8*n.distance:
-        good.append(m)
-        pts2.append(kp2[m.trainIdx].pt)
-        pts1.append(kp1[m.queryIdx].pt)
-    #print kp1
+    for i, (m, n) in enumerate(matches):
+        if m.distance < 0.8*n.distance:
+            good.append(m)
+            pts2.append(kp2[m.trainIdx].pt)
+            pts1.append(kp1[m.queryIdx].pt)
+    # print kp1
     pts1 = np.float32(pts1)
     pts2 = np.float32(pts2)
-    #print pts1
-    fMat, mask = cv2.findFundamentalMat(pts1,pts2,cv2.FM_LMEDS)
-    h1 = np.float32((3,3))
-    h2 = np.float32((3,3))
+    # print pts1
+    fMat, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_LMEDS)
+    h1 = np.float32((3, 3))
+    h2 = np.float32((3, 3))
     cv2.stereoRectifyUncalibrated(pts1, pts2, fMat, (height, width), h1, h2)
     return fMat, h1, h2
+
 
 def disparity_map(image_left, image_right):
     """Compute the disparity images for image_left and image_right.
