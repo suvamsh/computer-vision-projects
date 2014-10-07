@@ -46,8 +46,10 @@ def rectify_pair(image_left, image_right, viz=False):
     pts2 = np.float32(pts2)
     # print pts1
     fMat, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_LMEDS)
-    h1 = np.float32((3, 3))
-    h2 = np.float32((3, 3))
+    pts1 = pts1.flatten()
+    pts2 = pts2.flatten()
+    h1 = np.empty((3, 3))
+    h2 = np.empty((3, 3))
     cv2.stereoRectifyUncalibrated(pts1, pts2, fMat, (height, width), h1, h2)
     return fMat, h1, h2
 
