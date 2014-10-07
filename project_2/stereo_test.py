@@ -38,6 +38,7 @@ class TestStereo(unittest.TestCase):
         return difference_magnitude
 
     def test_rectify_pair(self):
+        import numpy as np
         left = cv2.imread('test_data/kitchen_left.jpg')
         right = cv2.imread('test_data/kitchen_right.jpg')
 
@@ -51,7 +52,7 @@ class TestStereo(unittest.TestCase):
              [-4.57131715e-05, -2.03219010e-06, 1.42189842e-01],
              [-5.01095221e-03, -1.09146504e-01, 1.00000000e+00]])
         F_diff = self._matrix_diff(F_expected, F, "fundamental matrix")
-        # self.assertLessEqual(F_diff, max_difference_magnitude)
+        self.assertLessEqual(F_diff, max_difference_magnitude)
 
         H_left_expected = numpy.array(
             [[-9.78273713e-02, 6.04430191e-02, -1.69179548e+01],

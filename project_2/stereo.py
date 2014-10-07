@@ -32,25 +32,19 @@ def rectify_pair(image_left, image_right, viz=False):
 
     flann = cv2.FlannBasedMatcher(index_params, search_params)
     matches = flann.knnMatch(des1, des2, k=2)
-    # store good matches
-    good = []
+
     pts1 = []
     pts2 = []
     for i, (m, n) in enumerate(matches):
-        if m.distance < 0.8*n.distance:
-            good.append(m)
+        if m.distance < 0.65*n.distance: # ratio scientifically chosen to be best
             pts2.append(kp2[m.trainIdx].pt)
             pts1.append(kp1[m.queryIdx].pt)
-    # print kp1
     pts1 = np.float32(pts1)
     pts2 = np.float32(pts2)
-    # print pts1
-    fMat, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_LMEDS)
-    pts1 = pts1.flatten()
-    pts2 = pts2.flatten()
+    fMat, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, 3, 0.99) # cv2.FM_LMEDS) # this appears to work the same
     h1 = np.empty((3, 3))
     h2 = np.empty((3, 3))
-    cv2.stereoRectifyUncalibrated(pts1, pts2, fMat, (height, width), h1, h2)
+    cv2.stereoRectifyUncalibrated(pts1.flatten(), pts2.flatten(), fMat, (height, width), h1, h2, threshold=3)
     return fMat, h1, h2
 
 
