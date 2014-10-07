@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Project 2: Stereo vision.
 
 In this project, you'll extract dense 3D information from stereo image pairs.
@@ -142,3 +143,40 @@ property uchar green
 property uchar blue
 end_header
 '''
+
+
+def main():
+    import sys
+    if len(sys.argv) < 4:
+        print "Usage: ./stereo.py [output_point_cloud] [left_image] [right_image]"
+        return
+
+    image_left = cv2.imread(sys.argv[2])
+    image_right = cv2.imread(sys.argv[3])
+
+    fmat, homography_left, homography_right = rectify_pair(image_left, image_right)
+
+    print image_left.shape
+
+    left_h, left_w, _ = image_left.shape
+    left_shape = (left_w, left_h)
+    rectify_left = cv2.warpPerspective(image_left, homography_left, left_shape)
+
+    right_h, right_w, _ = image_right.shape
+    right_shape = (right_w, right_h)
+    rectify_right = cv2.warpPerspective(image_right, homography_right, right_shape)
+
+    disparity = disparity_map(rectify_left, rectify_right)
+
+    cv2.imshow("left", image_left)
+    cv2.imshow("right", image_right)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    cv2.imshow("rleft", rectify_left)
+    cv2.imshow("rright", rectify_right)
+    cv2.imshow("disparity", disparity)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    main()
