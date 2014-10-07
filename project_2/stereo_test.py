@@ -81,6 +81,10 @@ class TestStereo(unittest.TestCase):
         # Compute disparity using the function under test.
         disparity = stereo.disparity_map(left, right)
 
+        cv2.imshow('expected', disparity_expected)
+        cv2.imshow('actual', disparity)
+        cv2.waitKey()
+
         # Compute the difference between the two. Useful to visualize this!
         disparity_diff = cv2.absdiff(disparity, disparity_expected)
 
@@ -93,8 +97,9 @@ class TestStereo(unittest.TestCase):
     def test_point_cloud(self):
         disparity = cv2.imread('test_data/tsukuba/disparity_left.png',
                                cv2.CV_LOAD_IMAGE_GRAYSCALE)
+
         colors = cv2.imread('test_data/tsukuba/left.png')
-        focal_length = 10
+        focal_length = 300
 
         ply_string = stereo.point_cloud(disparity, colors, focal_length)
         # View me in Meshlab!
