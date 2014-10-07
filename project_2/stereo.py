@@ -6,6 +6,7 @@ In this project, you'll extract dense 3D information from stereo image pairs.
 import cv2
 import math
 import numpy as np
+from matplotlib import pyplot as plt
 
 
 def rectify_pair(image_left, image_right, viz=False):
@@ -35,16 +36,20 @@ def rectify_pair(image_left, image_right, viz=False):
 
     pts1 = []
     pts2 = []
+    # ratio scientifically chosen to be best
     for i, (m, n) in enumerate(matches):
-        if m.distance < 0.65*n.distance: # ratio scientifically chosen to be best
+        if m.distance < 0.65*n.distance:
             pts2.append(kp2[m.trainIdx].pt)
             pts1.append(kp1[m.queryIdx].pt)
     pts1 = np.float32(pts1)
     pts2 = np.float32(pts2)
-    fMat, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, 3, 0.99) # cv2.FM_LMEDS) # this appears to work the same
+    fMat, mask = cv2.findFundamentalMat(pts1, pts2, cv2.FM_RANSAC, 3, 0.99)
+    # cv2.FM_LMEDS) # this appears to work the same
     h1 = np.empty((3, 3))
     h2 = np.empty((3, 3))
-    cv2.stereoRectifyUncalibrated(pts1.flatten(), pts2.flatten(), fMat, (height, width), h1, h2, threshold=3)
+    cv2.stereoRectifyUncalibrated(
+        pts1.flatten(), pts2.flatten(), fMat,
+        (height, width), h1, h2, threshold=3)
     return fMat, h1, h2
 
 
@@ -59,6 +64,14 @@ def disparity_map(image_left, image_right):
         with respect to image_left's input pixels.
     """
     pass
+    gray_imgL = cv2.cvtColor(image_left, cv2.COLOR_BGR2GRAY)
+    gray_imgR = cv2.cvtColor(image_right, cv2.COLOR_BGR2GRAY)
+    stereo = cv2.StereoBM(
+        cv2.STEREO_BM_BASIC_PRESET, ndisparities=160, SADWindowSize=15)
+    disparity = stereo.compute(gray_imgL, gray_imgR)
+    plt.imshow(disparity, 'gray')
+    plt.show()
+    return disparity
 
 
 def point_cloud(disparity_image, image_left, focal_length):
