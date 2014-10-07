@@ -15,6 +15,8 @@ import stereo
 import numpy
 import unittest
 
+DEBUG = False
+
 
 class TestStereo(unittest.TestCase):
     """Tests the functionality of the stereo module."""
@@ -79,9 +81,10 @@ class TestStereo(unittest.TestCase):
         # Compute disparity using the function under test.
         disparity = stereo.disparity_map(left, right)
 
-        cv2.imshow('expected', disparity_expected)
-        cv2.imshow('actual', disparity)
-        cv2.waitKey()
+        if (DEBUG):
+            cv2.imshow('expected', disparity_expected)
+            cv2.imshow('actual', disparity)
+            cv2.waitKey()
 
         # Compute the difference between the two. Useful to visualize this!
         disparity_diff = cv2.absdiff(disparity, disparity_expected)

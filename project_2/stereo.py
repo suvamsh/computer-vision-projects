@@ -65,9 +65,6 @@ def disparity_map(image_left, image_right):
       an single-channel image containing disparities in pixels,
         with respect to image_left's input pixels.
     """
-    # gray_imgL = cv2.cvtColor(image_left, cv2.COLOR_BGR2GRAY)
-    # gray_imgR = cv2.cvtColor(image_right, cv2.COLOR_BGR2GRAY)
-    # stereo = cv2.StereoBM(cv2.STEREO_BM_BASIC_PRESET, ndisparities=16, SADWindowSize=15)
     window_size = 3
     min_disp = 16
     num_disp = 112-min_disp
@@ -84,17 +81,10 @@ def disparity_map(image_left, image_right):
         fullDP=False
         )
 
-    disp = stereo.compute(image_left, image_right)
-    # disp = stereo.compute(gray_imgL, gray_imgR)
+    disp_1 = stereo.compute(image_left, image_right) / 16
+    disp_1 = np.array(disp_1, dtype='uint8')
 
-    # plt.imshow(disparity, 'gray')
-    cv2.imshow('d', disp)
-    cv2.imshow('asd', disp * 32)
-    # plt.show()
-    cv2.waitKey()
-
-    return disp  # disparity.astype('uint8')
-    # return cv2.cvtColor(disparity, cv2.COLOR_BGR2GRAY)
+    return disp_1
 
 
 def point_cloud(disparity_image, image_left, focal_length):
@@ -148,25 +138,31 @@ end_header
 def main():
     import sys
     if len(sys.argv) < 4:
-        print "Usage: ./stereo.py [output_point_cloud] [left_image] [right_image]"
+        print """Usage: ./stereo.py [output_point_cloud]
+                 [left_image] [right_image]"""
         return
 
+    out_file = sys.argv[1]
     image_left = cv2.imread(sys.argv[2])
     image_right = cv2.imread(sys.argv[3])
 
-    fmat, homography_left, homography_right = rectify_pair(image_left, image_right)
-
-    print image_left.shape
+    fmat, h_left, h_right = rectify_pair(image_left, image_right)
 
     left_h, left_w, _ = image_left.shape
     left_shape = (left_w, left_h)
-    rectify_left = cv2.warpPerspective(image_left, homography_left, left_shape)
+    rectify_left = cv2.warpPerspective(image_left, h_left, left_shape)
 
     right_h, right_w, _ = image_right.shape
     right_shape = (right_w, right_h)
-    rectify_right = cv2.warpPerspective(image_right, homography_right, right_shape)
+    rectify_right = cv2.warpPerspective(image_right, h_right, right_shape)
 
     disparity = disparity_map(rectify_left, rectify_right)
+
+    focal_length = 300
+    ply_string = point_cloud(disparity, image_left, focal_length)
+
+    with open(out_file, 'w') as f:
+        f.write(ply_string)
 
     cv2.imshow("left", image_left)
     cv2.imshow("right", image_right)
@@ -177,6 +173,7 @@ def main():
     cv2.imshow("disparity", disparity)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
 
 if __name__ == '__main__':
     main()
