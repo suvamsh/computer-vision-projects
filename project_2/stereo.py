@@ -64,29 +64,36 @@ def disparity_map(image_left, image_right):
       an single-channel image containing disparities in pixels,
         with respect to image_left's input pixels.
     """
-
+    # gray_imgL = cv2.cvtColor(image_left, cv2.COLOR_BGR2GRAY)
+    # gray_imgR = cv2.cvtColor(image_right, cv2.COLOR_BGR2GRAY)
+    # stereo = cv2.StereoBM(cv2.STEREO_BM_BASIC_PRESET, ndisparities=16, SADWindowSize=15)
     window_size = 3
     min_disp = 16
     num_disp = 112-min_disp
-    stereo = cv2.StereoSGBM(minDisparity = min_disp,
-        numDisparities = num_disp,
-        SADWindowSize = window_size,
-        uniquenessRatio = 10,
-        speckleWindowSize = 100,
-        speckleRange = 32,
-        disp12MaxDiff = 1,
-        P1 = 8*3*window_size**2,
-        P2 = 32*3*window_size**2,
-        fullDP = False
-    )
+    stereo = cv2.StereoSGBM(
+        minDisparity=min_disp,
+        numDisparities=num_disp,
+        SADWindowSize=window_size,
+        uniquenessRatio=10,
+        speckleWindowSize=100,
+        speckleRange=32,
+        disp12MaxDiff=1,
+        P1=8*3*window_size**2,
+        P2=32*3*window_size**2,
+        fullDP=False
+        )
 
     disp = stereo.compute(image_left, image_right)
+    # disp = stereo.compute(gray_imgL, gray_imgR)
 
+    # plt.imshow(disparity, 'gray')
     cv2.imshow('d', disp)
     cv2.imshow('asd', disp * 32)
+    # plt.show()
     cv2.waitKey()
-    
-    return disp # disparity.astype('uint8')
+
+    return disp  # disparity.astype('uint8')
+    # return cv2.cvtColor(disparity, cv2.COLOR_BGR2GRAY)
 
 
 def point_cloud(disparity_image, image_left, focal_length):
@@ -106,8 +113,8 @@ def point_cloud(disparity_image, image_left, focal_length):
     w, h = disparity_image.shape
     f = 0.8 * w
     Q = np.float32([[1, 0, 0, -0.5*w],
-                    [0,-1, 0,  0.5*h], # turn points 180 deg around x-axis,
-                    [0, 0, 0,     -f], # so that y-axis looks up
+                    [0, -1, 0,  0.5*h],  # turn points 180 deg around x-axis,
+                    [0, 0, 0,     -f],  # so that y-axis looks up
                     [0, 0, 1,      0]])
     points = cv2.reprojectImageTo3D(disparity_image, Q)
     colors = cv2.cvtColor(image_left, cv2.COLOR_BGR2RGB)
@@ -122,6 +129,7 @@ def point_cloud(disparity_image, image_left, focal_length):
     np.savetxt(output, verts, '%f %f %f %d %d %d')
 
     return output.getvalue()
+
 
 ply_header = '''ply
 format ascii 1.0
