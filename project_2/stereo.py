@@ -102,11 +102,10 @@ def point_cloud(disparity_image, image_left, focal_length):
     """
 
     w, h = disparity_image.shape
-    f = 0.8 * w
     Q = np.float32([[1, 0, 0, -0.5*w],
                     [0, -1, 0,  0.5*h],  # turn points 180 deg around x-axis,
-                    [0, 0, 0,     -f],  # so that y-axis looks up
-                    [0, 0, 1,      0]])
+                    [0, 0, focal_length,     0],  # so that y-axis looks up
+                    [0, 0, 0,      1]])
     points = cv2.reprojectImageTo3D(disparity_image, Q)
     colors = cv2.cvtColor(image_left, cv2.COLOR_BGR2RGB)
     mask = disparity_image > disparity_image.min()
@@ -158,8 +157,7 @@ def main():
 
     disparity = disparity_map(rectify_left, rectify_right)
 
-    focal_length = 300
-    ply_string = point_cloud(disparity, image_left, focal_length)
+    ply_string = point_cloud(disparity, image_left, .5)
 
     with open(out_file, 'w') as f:
         f.write(ply_string)

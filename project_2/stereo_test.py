@@ -15,7 +15,7 @@ import stereo
 import numpy
 import unittest
 
-DEBUG = False
+DEBUG = True
 
 
 class TestStereo(unittest.TestCase):
@@ -100,7 +100,7 @@ class TestStereo(unittest.TestCase):
                                cv2.CV_LOAD_IMAGE_GRAYSCALE)
 
         colors = cv2.imread('test_data/tsukuba/left.png')
-        focal_length = 300
+        focal_length = 10
 
         ply_string = stereo.point_cloud(disparity, colors, focal_length)
         # View me in Meshlab!
