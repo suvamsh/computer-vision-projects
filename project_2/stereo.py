@@ -136,14 +136,15 @@ end_header
 
 def main():
     import sys
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 5:
         print """Usage: ./stereo.py [output_point_cloud]
-                 [left_image] [right_image]"""
+                 [left_image] [right_image] [focal_length]"""
         return
 
     out_file = sys.argv[1]
     image_left = cv2.imread(sys.argv[2])
     image_right = cv2.imread(sys.argv[3])
+    focal_length = sys.argv[4]
 
     fmat, h_left, h_right = rectify_pair(image_left, image_right)
 
@@ -157,7 +158,7 @@ def main():
 
     disparity = disparity_map(rectify_left, rectify_right)
 
-    ply_string = point_cloud(disparity, image_left, .5)
+    ply_string = point_cloud(disparity, image_left, focal_length)
 
     with open(out_file, 'w') as f:
         f.write(ply_string)
