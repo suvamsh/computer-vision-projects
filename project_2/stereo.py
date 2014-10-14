@@ -157,12 +157,14 @@ def main():
     right_shape = (right_w, right_h)
     rectify_right = cv2.warpPerspective(image_right, h_right, right_shape)
 
-    disparity = my_disparity_map(rectify_left, rectify_right, int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]))
+    disparity = my_disparity_map(
+        rectify_left, rectify_right,
+        int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]))
 
-    #ply_string = point_cloud(disparity, image_left, focal_length)
+    ply_string = point_cloud(disparity, image_left, focal_length)
 
-    #with open(out_file, 'w') as f:
-    #    f.write(ply_string)
+    with open(out_file, 'w') as f:
+        f.write(ply_string)
 
     cv2.imshow("left", image_left)
     cv2.imshow("right", image_right)
@@ -175,7 +177,8 @@ def main():
     cv2.destroyAllWindows()
 
 
-def my_disparity_map(image_left, image_right, window_size_, min_disp_, uniquenessRatio_):
+def my_disparity_map(
+        image_left, image_right, window_size_, min_disp_, uniquenessRatio_):
     """Compute the disparity images for image_left and image_right.
 
     Arguments:
