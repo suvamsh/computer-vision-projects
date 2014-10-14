@@ -138,7 +138,8 @@ def main():
     import sys
     if len(sys.argv) < 5:
         print """Usage: ./stereo.py [output_point_cloud]
-                 [left_image] [right_image] [focal_length]"""
+                 [left_image] [right_image] [focal_length]
+                 [window size] [min disparity] [uniqueness ratio]"""
         return
 
     out_file = sys.argv[1]
@@ -156,12 +157,12 @@ def main():
     right_shape = (right_w, right_h)
     rectify_right = cv2.warpPerspective(image_right, h_right, right_shape)
 
-    disparity = disparity_map(rectify_left, rectify_right)
+    disparity = my_disparity_map(rectify_left, rectify_right, int(sys.argv[5]), int(sys.argv[6]), int(sys.argv[7]))
 
-    ply_string = point_cloud(disparity, image_left, focal_length)
+    #ply_string = point_cloud(disparity, image_left, focal_length)
 
-    with open(out_file, 'w') as f:
-        f.write(ply_string)
+    #with open(out_file, 'w') as f:
+    #    f.write(ply_string)
 
     cv2.imshow("left", image_left)
     cv2.imshow("right", image_right)
@@ -172,6 +173,38 @@ def main():
     cv2.imshow("disparity", disparity)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+
+
+def my_disparity_map(image_left, image_right, window_size_, min_disp_, uniquenessRatio_):
+    """Compute the disparity images for image_left and image_right.
+
+    Arguments:
+      image_left, image_right: rectified stereo image pair.
+
+    Returns:
+      an single-channel image containing disparities in pixels,
+        with respect to image_left's input pixels.
+    """
+    window_size = window_size_
+    min_disp = min_disp_
+    num_disp = 112-min_disp
+    stereo = cv2.StereoSGBM(
+        minDisparity=min_disp,
+        numDisparities=num_disp,
+        SADWindowSize=window_size,
+        uniquenessRatio=uniquenessRatio_,
+        speckleWindowSize=0,
+        speckleRange=0,
+        disp12MaxDiff=1,
+        P1=8*3*window_size**2,
+        P2=32*3*window_size**2,
+        fullDP=False
+        )
+
+    disp_1 = stereo.compute(image_left, image_right) / 16
+    disp_1 = np.array(disp_1, dtype='uint8')
+
+    return disp_1
 
 
 if __name__ == '__main__':
