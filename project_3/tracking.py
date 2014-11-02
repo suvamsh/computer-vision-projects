@@ -42,7 +42,7 @@ def track_ball_1(video):
         radius_final = radius_avg / radius_num
         out_list.append((circles[0][0][0] - radius_final, circles[0][0][1] - radius_final, circles[0][0][0] + radius_final, circles[0][0][1] + radius_final)) 
 
-    print out_list
+    #print out_list
     return out_list
 
 def track_ball_2(video):
@@ -62,4 +62,25 @@ def track_ball_4(video):
 
 def track_face(video):
     """As track_ball_1, but for face.mov."""
-    pass
+    cap = cv2.VideoCapture('test_data/face.mov')
+    # Create the haar cascade
+    faceCascade = cv2.CascadeClassifier('data/haarcascade_frontalface_default.xml')
+    outList = []
+    while (cap.isOpened()):
+        # take first frame of the video
+        ret,frame = cap.read()
+        #cv2.imshow("face",frame)
+        #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # Detect faces in the image
+        faces = faceCascade.detectMultiScale(frame,
+                                        scaleFactor=1.3,
+                                        minNeighbors=5,
+                                        minSize=(30, 30),
+                                        flags = cv2.cv.CV_HAAR_SCALE_IMAGE
+                                        )
+        # Draw a rectangle around the faces
+        for (x, y, w, h) in faces:
+            print (x-w, y-h, x+w, y+h)
+            outList.append((x-w, y-h, x+w, y+h))
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+    return outList
