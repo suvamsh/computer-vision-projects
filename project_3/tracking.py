@@ -12,7 +12,7 @@ def get_initial_position(frame):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     circles = cv2.HoughCircles(frame, cv2.cv.CV_HOUGH_GRADIENT, 2, 1000,
-                                param1=40, param2=20, minRadius=0, maxRadius=0)
+                                param1=40, param2=20, minRadius=20, maxRadius=34)
     circles = np.uint16(np.around(circles))
     print circles
     return circles[0][0]
@@ -26,8 +26,15 @@ def track_ball(video):
     # take first frame of the video
     ret,frame = video.read()
     height, width, depth = frame.shape
-    frame_history.append(frame)
+    #frame_history.append(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
 
+    # setup initial pixel history for background subtraction
+    current_frame = 0
+    '''pixel_set = [][][]
+    for i in range(0, width):
+        for j in range(0, height):
+            pixel_set[i][j][current_frame] = frame[i][j] 
+            '''
     # get initial location of ball
     initial_circle = get_initial_position(frame)
 
@@ -52,13 +59,17 @@ def track_ball(video):
 
     while(1):
         ret ,frame = video.read()
-        frame_history.append(frame)
+   #     frame_history.append(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
 
         if ret == True:
             # figure out new background
-            background = frame.copy()
-#            for i in range(0, background)
-#            for (f in frame_history):
+            '''background = frame.copy()
+            pixel_set = []
+            for i in range(0, width):
+                for j in range(0, height):
+                    for (f in frame_history):
+                        pixel_set
+'''
 
 
 
