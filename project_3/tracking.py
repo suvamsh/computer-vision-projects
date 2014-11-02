@@ -117,8 +117,6 @@ def track_face(video):
     while (cap.isOpened()):
         # take first frame of the video
         ret,frame = cap.read()
-        if ret == False:
-            break
         #cv2.imshow("face",frame)
         #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # Detect faces in the image
@@ -132,6 +130,9 @@ def track_face(video):
         for (x, y, w, h) in faces:
             #print (x-w, y-h, x+w, y+h)
             outList.append((x-w, y-h, x+w, y+h))
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+            #cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+        if ret == False:
+            break
+    print "len of outList = ", len(outList)
     return outList
     
