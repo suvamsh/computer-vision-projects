@@ -12,7 +12,7 @@ def get_initial_position(frame):
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     circles = cv2.HoughCircles(frame, cv2.cv.CV_HOUGH_GRADIENT, 2, 1000,
-                                param1=40, param2=20, minRadius=20, maxRadius=34)
+                                param1=40, param2=20, minRadius=0, maxRadius=0)
     circles = np.uint16(np.around(circles))
     #print circles
     return circles[0][0]
@@ -26,15 +26,11 @@ def track_ball(video):
     # take first frame of the video
     ret,frame = video.read()
     height, width, depth = frame.shape
-    #frame_history.append(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
 
     # setup initial pixel history for background subtraction
-    current_frame = 0
-    '''pixel_set = [][][]
-    for i in range(0, width):
-        for j in range(0, height):
-            pixel_set[i][j][current_frame] = frame[i][j] 
-            '''
+    frame_history.append(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
+    current_frame = 1
+
     # get initial location of ball
     initial_circle = get_initial_position(frame)
 
@@ -57,21 +53,11 @@ def track_ball(video):
     # Setup the termination criteria, either 20 iterations or move by atleast 1 pt
     term_crit = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 20, 1)
 
+    
     while(1):
         ret ,frame = video.read()
-   #     frame_history.append(cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY))
 
         if ret == True:
-            # figure out new background
-            '''background = frame.copy()
-            pixel_set = []
-            for i in range(0, width):
-                for j in range(0, height):
-                    for (f in frame_history):
-                        pixel_set
-'''
-
-
 
             hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             dst = cv2.calcBackProject([hsv],[0],roi_hist,[0,180],1)
@@ -81,6 +67,7 @@ def track_ball(video):
 
             # Append new window to coordinates
             x,y,w,h = track_window
+
             coords.append((x, y, x+w, y+h))
         else:
             break
