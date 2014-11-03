@@ -120,30 +120,34 @@ def track_ball_4(video):
 
 def track_face(video):
     """As track_ball_1, but for face.mov."""
-    
-    cap = cv2.VideoCapture('test_data/face.mov')
+    minX = 0
+    cap = video
+    #cap = cv2.VideoCapture(video)
     # Create the haar cascade
     faceCascade = cv2.CascadeClassifier('data/haarcascade_frontalface_default.xml')
     outList = []
+    outliers = 0
+    count = 0
     while (cap.isOpened()):
         # take first frame of the video
         ret,frame = cap.read()
-        #cv2.imshow("face",frame)
-        #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        if ret == False:
+            break
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # Detect faces in the image
-        faces = faceCascade.detectMultiScale(frame,
-                                        scaleFactor=1.3,
+        faces = faceCascade.detectMultiScale(gray,
+                                        scaleFactor=1.1,
                                         minNeighbors=5,
                                         minSize=(30, 30),
                                         flags = cv2.cv.CV_HAAR_SCALE_IMAGE
                                         )
-        # Draw a rectangle around the faces
+        # Add rectangle co ordinates to list
         for (x, y, w, h) in faces:
-            #print (x-w, y-h, x+w, y+h)
-            outList.append((x-w, y-h, x+w, y+h))
-            #cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-        if ret == False:
-            break
+            count = count + 1
+            if minX - (x-w) < 18:
+                outList.append((x-w, y-h, x+w, y+h))
+            minX = x-w
+    print " count = ", count
     print "len of outList = ", len(outList)
     return outList
     
