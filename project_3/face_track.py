@@ -8,7 +8,7 @@ maxY = 0
 outliers = 0
 cap = cv2.VideoCapture('test_data/face.mov')
 # Create the haar cascade
-faceCascade = cv2.CascadeClassifier('data/haarcascade_eye.xml')
+faceCascade = cv2.CascadeClassifier('data/haarcascade_frontalface_default.xml')
 count = 0
 while (cap.isOpened()):
 	# take first frame of the video
@@ -21,7 +21,7 @@ while (cap.isOpened()):
 	faces = faceCascade.detectMultiScale(frame,
     									scaleFactor=1.1,
     									minNeighbors=5,
-    									minSize=(70, 70),
+    									minSize=(30, 30),
     									flags = cv2.cv.CV_HAAR_SCALE_IMAGE
 										)
 	# Draw a rectangle around the faces
@@ -32,7 +32,7 @@ while (cap.isOpened()):
 			#print (x-w, y-h, x+w, y+h)
 		else:
 			if count != 1:	
-				outList.append((x-w, y-h, x+w, y+h))
+				outList.append((x, y, x + w, y + h))#(x-w, y-h, x+w, y+h))
 		minX = x-w
 		cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 

@@ -120,17 +120,11 @@ def track_ball_4(video):
 
 def track_face(video):
     """As track_ball_1, but for face.mov."""
-    minX = 0
-    cap = video
-    #cap = cv2.VideoCapture(video)
-    # Create the haar cascade
     faceCascade = cv2.CascadeClassifier('data/haarcascade_frontalface_default.xml')
     outList = []
-    outliers = 0
-    count = 0
-    while (cap.isOpened()):
+    while True:
         # take first frame of the video
-        ret,frame = cap.read()
+        ret,frame = video.read()
         if ret == False:
             break
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -141,13 +135,6 @@ def track_face(video):
                                         minSize=(30, 30),
                                         flags = cv2.cv.CV_HAAR_SCALE_IMAGE
                                         )
-        # Add rectangle co ordinates to list
-        for (x, y, w, h) in faces:
-            count = count + 1
-            if minX - (x-w) < 18:
-                outList.append((x-w, y-h, x+w, y+h))
-            minX = x-w
-    print " count = ", count
-    print "len of outList = ", len(outList)
+        outList.append((faces[0][0], faces[0][1], faces[0][0]+faces[0][2], faces[0][1]+faces[0][3]))
     return outList
     
