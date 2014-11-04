@@ -16,7 +16,8 @@ def draw_detections(img, rects, thickness = 1):
 
 
 
-hogParams = {'winStride': (8, 8), 'padding': (32, 32), 'scale': 1.05}
+#hogParams = {'winStride': (8, 8), 'padding': (32, 32), 'scale': 1.05}
+hogParams = {'hitThreshold': -.5, 'scale': 1.05}
 
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
