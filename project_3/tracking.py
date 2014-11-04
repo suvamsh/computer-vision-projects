@@ -162,22 +162,27 @@ def track_ball_4(video):
 
 def track_face(video):
     """As track_ball_1, but for face.mov."""
+    #load the face detection dataset which has already been trained
     faceCascade = cv2.CascadeClassifier(
         'data/haarcascade_frontalface_default.xml')
     outList = []
     while True:
-        # take first frame of the video
+        # pull return value and frame
+        #return value -> whether frame exists or not
+        #frame -> actual frame object
         ret, frame = video.read()
         if not ret:
             break
+        #convert frame to grayscale, known to be better for face detection
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        # Detect faces in the image
+        # Use cascade classifier to detect face
         faces = faceCascade.detectMultiScale(gray,
                                              scaleFactor=1.1,
                                              minNeighbors=5,
                                              minSize=(30, 30),
                                              flags = cv2.cv.CV_HAAR_SCALE_IMAGE
                                              )
+        #add rectangle coordinates of tracked face
         outList.append(
             (faces[0][0],
              faces[0][1],
