@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+using System.IO;
 
 public class ArrowKeyMovement : MonoBehaviour {
 	public GoogleMap googleMap;
@@ -9,6 +9,9 @@ public class ArrowKeyMovement : MonoBehaviour {
 	void Start () {
 		//RequireComponent(GoogleMap);
 		googleMap = GetComponent<GoogleMap>();
+		Color newColor = this.renderer.material.color;
+		newColor.a = 255;
+		this.renderer.material.color = newColor;
 	}
 	
 	// Update is called once per frame
@@ -70,6 +73,8 @@ public class ArrowKeyMovement : MonoBehaviour {
 				// update texture using googlemaps
 			googleMap.zoom++;
 			googleMap.Refresh();
+			Vector3 increment = new Vector3(1, 1, 1);
+			this.transform.localScale += increment;
 			Debug.Log("Increased Zoom");
 		}
 		if (Input.GetKey(KeyCode.X)) 
@@ -77,7 +82,28 @@ public class ArrowKeyMovement : MonoBehaviour {
 			// update texture using googlemaps
 			googleMap.zoom--;
 			googleMap.Refresh();
+			Vector3 increment = new Vector3(1, 1, 1);
+			this.transform.localScale -= increment;
 			Debug.Log("Decreased Zoom");
 		}
+		if (Input.GetKey(KeyCode.S))
+		{
+			Debug.Log("Saved screenshot");
+			// Application.CaptureScreenshot("Screenshot.png");
+			StartCoroutine(screenshot (Screen.width, Screen.height));
+		}
+	}
+	IEnumerator screenshot(int width, int height)
+	{
+		yield return new WaitForEndOfFrame();
+		Texture2D sshot = new Texture2D(width/2, height);
+		sshot.ReadPixels(new Rect(0, 0, width/2, height), 0, 0);
+		sshot.Apply();
+		GameObject flatGlobe = GameObject.Find ("FlatGlobe");
+		flatGlobe.renderer.material.mainTexture = sshot;
+		byte[] pngShot = sshot.EncodeToPNG();
+		Destroy(sshot);
+		File.WriteAllBytes(Application.dataPath + "/../screenshot_" + Random.Range(0, 1024).ToString() + ".png", pngShot);
+		
 	}
 }
