@@ -48,7 +48,9 @@ public class StreetView : MonoBehaviour
 			
 			var tex = new Texture2D (600, 300);
 			req.LoadImageIntoTexture (tex);
-			this.renderer.material.mainTexture = req.texture;
+			GameObject flatGlobe = GameObject.Find ("FlatGlobe");
+			flatGlobe.renderer.material.mainTexture = req.texture;
+
 		} else {
 			Debug.Log ("Error" + req.error);
 		}
