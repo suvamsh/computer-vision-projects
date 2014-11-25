@@ -12,10 +12,8 @@ public class ArrowKeyMovement : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		//RequireComponent(GoogleMap);
-		if (sview)
-			streetView = GetComponent<StreetView> ();
-		if (gmap)
-			googleMap = GetComponent<GoogleMap>();
+		streetView = GetComponent<StreetView> ();
+		googleMap = GetComponent<GoogleMap>();
 		Color newColor = this.renderer.material.color;
 		newColor.a = 255;
 		this.renderer.material.color = newColor;
@@ -25,7 +23,9 @@ public class ArrowKeyMovement : MonoBehaviour {
 	void Update () {
 
 		if (Input.anyKey) {
-			StartCoroutine(screenshot (Screen.width, Screen.height));
+			if (gmap) {
+				StartCoroutine(screenshot (Screen.width, Screen.height));
+			}
 		}
 		if (Input.GetKey(KeyCode.LeftArrow))
 		{
@@ -82,14 +82,23 @@ public class ArrowKeyMovement : MonoBehaviour {
 		{
 			// update texture using googlemaps
 			ZoomIn();
+			if (googleMap.zoom > 10) {
+				sview = true;
+				gmap = false;
+				moveForward();
+			}
 		}
 		if (Input.GetKey(KeyCode.X)) 
 		{
 			// update texture using googlemaps
 			googleMap.zoom--;
-			googleMap.Refresh();
-			Vector3 increment = new Vector3(1, 1, 1);
-			this.transform.localScale -= increment;
+			if (googleMap.zoom <= 10) {
+				sview = false;
+				gmap = true;
+				googleMap.Refresh();
+				Vector3 increment = new Vector3(1, 1, 1);
+				this.transform.localScale -= increment;
+			}
 			Debug.Log("Decreased Zoom");
 		}
 		if (Input.GetKey(KeyCode.S))
