@@ -5,7 +5,7 @@ using System;
 
 public class ArrowKeyMovement : MonoBehaviour {
 	public bool gmap = false;
-	public bool sview = true;
+	public bool sview = false;
 	private GoogleMap googleMap;
 	private StreetView streetView;
 	public float speed = 0.2f;
@@ -24,7 +24,7 @@ public class ArrowKeyMovement : MonoBehaviour {
 
 		if (Input.anyKey) {
 			if (gmap) {
-				StartCoroutine(screenshot (Screen.width, Screen.height));
+				screenshot ();
 			}
 		}
 		if (Input.GetKey(KeyCode.LeftArrow))
@@ -81,7 +81,7 @@ public class ArrowKeyMovement : MonoBehaviour {
 		if (Input.GetKey(KeyCode.Z)) 
 		{
 			// update texture using googlemaps
-			ZoomIn();
+			Zoom(0.1f);
 			if (googleMap.zoom > 10) {
 				sview = true;
 				gmap = false;
@@ -105,7 +105,7 @@ public class ArrowKeyMovement : MonoBehaviour {
 		{
 			Debug.Log("Saved screenshot");
 			// Application.CaptureScreenshot("Screenshot.png");
-			StartCoroutine(screenshot (Screen.width, Screen.height));
+			screenshot ();
 		}
 		if (Input.GetKey (KeyCode.F)) {
 			moveForward();
@@ -120,7 +120,7 @@ public class ArrowKeyMovement : MonoBehaviour {
 			turnRight();
 		}
 	}
-	IEnumerator screenshot(int width, int height)
+	IEnumerator _screenshot(int width, int height)
 	{
 		yield return new WaitForEndOfFrame();
 		Texture2D sshot = new Texture2D(width/2, height);
@@ -136,16 +136,42 @@ public class ArrowKeyMovement : MonoBehaviour {
 		//File.WriteAllBytes(Application.dataPath + "/../screenshot_" + Random.Range(0, 1024).ToString() + ".png", pngShot);
 		
 	}
-	public void ZoomIn()
+	public void screenshot()
 	{
-		googleMap.zoom++;
-		googleMap.Refresh();
-		Vector3 increment = new Vector3(1, 1, 1);
-		this.transform.localScale += increment;
-		Debug.Log("Increased Zoom");
+		StartCoroutine (_screenshot(Screen.width, Screen.height));
 	}
 
-	void moveForward()
+
+	public double alpha = 1;
+	double prev = 0.0;
+
+	public void Zoom(float scale)
+	{
+			double smooth = (scale * alpha) + ((1 - alpha) * prev);
+			prev = smooth;
+			Debug.Log (smooth);
+			int z = (int)Math.Floor (smooth * 10.0);
+
+			googleMap.zoom = z;
+
+			//googleMap.Refresh();
+			if (z > 5) {
+				gmap = false;
+				sview = true;
+				moveForward();
+			} else {
+				gmap = true;
+				sview = false;
+				screenshot ();
+			}
+
+			Vector3 increment = new Vector3 (100 * scale, 100 * scale, 100 * scale);
+			this.transform.localScale = increment;
+		//Debug.Log("Increased Zoom");
+
+	}
+
+	public void moveForward()
 	{
 		Debug.Log ("Moving forward");
 		Debug.Log (streetView);
@@ -153,7 +179,7 @@ public class ArrowKeyMovement : MonoBehaviour {
 		streetView.Refresh ();
 	}
 
-	void moveBackward()
+	public void moveBackward()
 	{
 		Debug.Log ("Moving forward");
 		Debug.Log (streetView);
@@ -161,11 +187,11 @@ public class ArrowKeyMovement : MonoBehaviour {
 		streetView.Refresh ();
 	}
 
-	void turnLeft()
+	public void turnLeft()
 	{
 		streetView.turn (15);
 	}
-	void turnRight()
+	public void turnRight()
 	{
 		streetView.turn (-15);
 	}

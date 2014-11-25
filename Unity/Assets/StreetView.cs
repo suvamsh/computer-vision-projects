@@ -4,7 +4,7 @@ using System.Collections;
 using System;
 public class StreetView : MonoBehaviour
 {
-	public bool loadOnStart = true;
+	public bool loadOnStart = false;
 	public double heading = 0;
 	public double lat = 30.284003;
 	public double lon = -97.7446368;

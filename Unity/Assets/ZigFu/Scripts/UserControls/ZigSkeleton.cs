@@ -49,12 +49,16 @@ public class ZigSkeleton : MonoBehaviour
     private Vector3 rootPosition;
 
 	// Zoom gesture
-	private double rightHandX, leftHandX, rightShoulderX, leftShoulderX = 0.0, prevDis;
+	private Vector3 leftHand, rightHand, torso, leftShoulder, rightShoulder;
+	private double headY = 0.0, rightElbowX, prevDis;
 	private bool zoomTag = false;
 
 	// Processing speed
 	private int frameCounter = 0;
-	public int processSpeed = 150;
+	public int processSpeed = 250;
+	GameObject globe;
+	ArrowKeyMovement key;
+
 
     ZigJointId mirrorJoint(ZigJointId joint)
     {
@@ -111,6 +115,8 @@ public class ZigSkeleton : MonoBehaviour
 
     public void Awake()
     {
+		globe = GameObject.Find ("Globe");
+		key = globe.GetComponent<ArrowKeyMovement>();
         int jointCount = Enum.GetNames(typeof(ZigJointId)).Length;
 
         transforms = new Transform[jointCount];
@@ -204,6 +210,8 @@ public class ZigSkeleton : MonoBehaviour
     {
         return new Vector3(mirror ? -vec.x : vec.x, vec.y, vec.z);
     }
+	double average = 0.0;
+	int count = 0;
     void UpdatePosition(ZigJointId joint, Vector3 position)
     {
         joint = mirror ? mirrorJoint(joint) : joint;
@@ -217,22 +225,75 @@ public class ZigSkeleton : MonoBehaviour
         {
 			frameCounter++;
 
-			if(joint == ZigJointId.RightHand) rightHandX = position.x;
-			if(joint == ZigJointId.LeftHand) leftHandX = position.x;
-			if(joint == ZigJointId.RightShoulder) rightShoulderX = position.x;
-			if(joint == ZigJointId.LeftShoulder) leftShoulderX = position.x;
+			if(joint == ZigJointId.RightHand) {
+				rightHand = position;
+				// Debug.Log(rightHand.y);
+			} 
+			if (joint == ZigJointId.Torso) {
+				torso = position;
+			}
+			if(joint == ZigJointId.LeftHand) leftHand = position;
+			if(joint == ZigJointId.RightShoulder) {
+				rightShoulder = position;
+			}
+			if(joint == ZigJointId.LeftShoulder) leftShoulder = position;
+			if(joint == ZigJointId.RightElbow) rightElbowX = position.x; 
+			if(joint == ZigJointId.Head) headY = position.y;
 
-			//joint == ZigJointId.RightHand || joint == ZigJointId.LeftHand 
-			//|| joint == ZigJointId.RightShoulder || joint == ZigJointId.LeftShoulder
-			//	)
-			if(rightHandX > leftShoulderX && rightHandX < rightShoulderX 
-			   && frameCounter >= processSpeed * 0.15
-			   && leftHandX > leftShoulderX && leftHandX < rightShoulderX) {
-				frameCounter = 0;
-				double handDis = Math.Abs(rightHandX - leftHandX);
-				double shoulderDis = Math.Abs(rightShoulderX - leftShoulderX);
+			checkZoom();
+			if (key.sview) {
+				if (rightHand.y > headY + 50) {
+					key.gmap = true;
+					key.sview = false;
+					key.screenshot();
+				}
+				//Debug.Log ("zval: " + (rightHand.z - torso.z));
+				if ((rightHand.z - torso.z >= 400) && (frameCounter > processSpeed)) {
+					frameCounter = 0;
+					key.moveForward();
+				}
+				Debug.Log ("xval: " + (rightHand.x - torso.x));
+				if ((leftHand.x - rightShoulder.x >= 300) && (frameCounter > processSpeed * 1.2)) {
+					frameCounter = 0;
+					Debug.Log ("Turning right");
+					key.turnRight();
+				}
+				if ((rightHand.x < leftShoulder.x) && (frameCounter > processSpeed * 1.2)) {
+					frameCounter = 0;
+					Debug.Log ("Turning left");
+					key.turnLeft();
+				}
+			}
 
-				if(handDis < 50){// && rightHandX < leftShoulderX && leftHandX > rightShoulderX) {
+            Vector3 dest = Vector3.Scale(position, doMirror(Scale)) - rootPosition;
+            transforms[(int)joint].localPosition = Vector3.Lerp(transforms[(int)joint].localPosition, dest, Time.deltaTime * Damping);
+        }
+    }
+
+	public void checkZoom() {
+		if(rightHand.x > leftShoulder.x  && rightHand.x < rightShoulder.x 
+		   && frameCounter >= processSpeed * 0.05
+		   && leftHand.x > leftShoulder.x  && leftHand.x < rightShoulder.x
+		   && key.gmap) {
+			frameCounter = 0;
+			double handDis = Math.Abs(rightHand.x - leftHand.x);
+			double shoulderDis = Math.Abs(rightShoulder.x - leftShoulder.x);
+			
+			
+			count++;
+			average += handDis;
+			
+			if(count == 10) {
+				handDis = average / count;
+				count = 0;
+				average = 0;
+				Debug.Log (handDis/shoulderDis);
+				
+				key.Zoom((float)(handDis/shoulderDis));
+				
+			}
+			
+			/*if(handDis < 50){// && rightHandX < leftShoulderX && leftHandX > rightShoulderX) {
 					zoomTag = true;
 					prevDis = handDis;
 				}
@@ -240,21 +301,13 @@ public class ZigSkeleton : MonoBehaviour
 				if(zoomTag) {
 					if(handDis > 0 && (handDis - prevDis) > 0.025) {
 						Debug.Log (handDis/shoulderDis);
-						GameObject globe = GameObject.Find ("Globe");
-						ArrowKeyMovement key = globe.GetComponent<ArrowKeyMovement>();
-						key.ZoomIn();
+
 						prevDis = handDis;
 					}
-				}
-
-			} else if(frameCounter >= processSpeed * 0.15) {
-				zoomTag = false;
-			}
-
-            Vector3 dest = Vector3.Scale(position, doMirror(Scale)) - rootPosition;
-            transforms[(int)joint].localPosition = Vector3.Lerp(transforms[(int)joint].localPosition, dest, Time.deltaTime * Damping);
-        }
-    }
+				}*/
+			
+		} 
+	}
 
     public void RotateToCalibrationPose()
     {
