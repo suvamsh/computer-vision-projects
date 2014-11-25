@@ -1,0 +1,13 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/ArrowKeyMovement.cs">
+    <Files>
+      <File FileName="Assets/ZigFu/Scripts/UserControls/ZigSkeleton.cs" Line="245" Column="7" />
+      <File FileName="Assets/Scripts/ArrowKeyMovement.cs" Line="92" Column="4" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
